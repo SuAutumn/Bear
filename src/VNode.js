@@ -1,4 +1,4 @@
-import Component from "@/lib/Component";
+import Component from "./Component";
 function toSingleArray (array) {
   let r = []
   array.forEach(item => {

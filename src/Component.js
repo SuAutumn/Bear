@@ -1,4 +1,4 @@
-import diff, {updateEle} from "@/lib/patch";
+import diff, {updateEle} from "./patch";
 
 export default class Component {
   constructor (props) {

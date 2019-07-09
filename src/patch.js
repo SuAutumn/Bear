@@ -1,4 +1,4 @@
-import VNode from "@/lib/VNode";
+import VNode from "./VNode";
 
 function css(obj) {
   if (typeof obj === 'string') {
