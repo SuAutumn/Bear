@@ -1,5 +1,3 @@
-import VNode from "./VNode";
-
 function css(obj) {
   if (typeof obj === 'string') {
     return obj
@@ -41,30 +39,31 @@ function createPatchType(type, ref) {
   return r;
 }
 
+let vIndex = 0 // vritual dom walker step
+let dIndex = 0 // dom walker step
 export default function diff(newVNode, oldVNode) {
-  let walker = {
-    index: 0
-  }
+  vIndex = 0
   let patches = []
-  dfsWalk(newVNode, oldVNode, patches, walker)
+  dfsWalk(newVNode, oldVNode, patches)
   return patches
 }
 
-function dfsWalk(newVNode, oldVNode, patches, walker) {
+function isStringMaybe(t) {
+  return typeof t === 'string' || typeof t ===  'number' || t === null || t === undefined
+}
+
+function dfsWalk(newVNode, oldVNode, patches) {
   let patch = []
-  let index = walker.index
-  if (typeof oldVNode === 'string') {
-    if (newVNode !== oldVNode) {
-      patch.push(createPatchType(TEXT, newVNode))
-    }
+  let index = vIndex
+  if (isStringMaybe(oldVNode) && isStringMaybe(newVNode)) {
+    newVNode !== oldVNode && patch.push(createPatchType(TEXT, newVNode))
   } else if (!newVNode && oldVNode) {
     // newVNode is undefined and oldVNode is still alive
     // so remove the oldVNode
     patch.push(createPatchType(REMOVE, oldVNode))
-    diffChildren(undefined, oldVNode.children, patches, walker)
+    diffChildren(undefined, oldVNode.children, patches)
   } else if (newVNode.tagName === oldVNode.tagName) {
-    newVNode.el = oldVNode.el
-    // both new and old is instanceof VNode
+    newVNode.el = oldVNode.el // add el dom
     let diffProps = propsDiff(newVNode.props, oldVNode.props)
     if (Object.keys(diffProps).length > 0) {
       patch.push(createPatchType(PROPS, diffProps))
@@ -75,7 +74,7 @@ function dfsWalk(newVNode, oldVNode, patches, walker) {
       // when add nodes, need to parentNode add children
       patch.push(createPatchType(ADD, newVNode.children.slice(oldL, newL)))
     }
-    diffChildren(newVNode.children, oldVNode.children, patches, walker)
+    diffChildren(newVNode.children, oldVNode.children, patches)
   } else {
     patch.push(createPatchType(REPLACE, newVNode))
   }
@@ -92,35 +91,37 @@ function propsDiff(newObj = {}, oldObj = {}) {
   return r
 }
 
-function diffChildren(newChildren, oldChildren, patches, walker) {
+function diffChildren(newChildren, oldChildren, patches) {
   oldChildren.forEach((oldChild, i) => {
-    walker.index++
-    dfsWalk(newChildren && newChildren[i], oldChild, patches, walker)
+    vIndex++
+    dfsWalk(newChildren && newChildren[i], oldChild, patches)
   })
 }
 
 
 export function updateEle(ele, patches) {
+  dIndex = 0
   if (!ele) return
-  let walker = {index: 0, apply: []}
-  eleDfsWalk(ele, patches, walker)
-  // console.log(patches.length, walker.index + 1)
-  walker.apply.forEach(({node, patch}) => {
+  eleDfsWalk(ele, patches)
+}
+
+function eleDfsWalk(node, patches) {
+  let patch = patches[dIndex]
+  // if this node is not replace type
+  // walk deep, otherwise run patch directly
+  if (patch.every(p => {
+    return p.type !== REPLACE
+  })) {
+    let len = node.childNodes.length
+    for (let i = 0; i < len; i++) {
+      dIndex++;
+      eleDfsWalk(node.childNodes[i], patches)
+    }
+  }
+  if (patch.length > 0) {
     patch.forEach(p => {
       applyPatches(node, p)
     })
-  })
-}
-
-function eleDfsWalk(node, patches, walker) {
-  walker.apply.push({
-    node: node,
-    patch: patches[walker.index]
-  })
-  let len = node.childNodes.length
-  for (let i = 0; i < len; i++) {
-    walker.index++;
-    eleDfsWalk(node.childNodes[i], patches, walker)
   }
 }
 
@@ -140,12 +141,7 @@ function applyPatches(node, patch) {
       }
       break;
     case TEXT:
-      if (patch.content instanceof VNode) {
-        node.removeChild(node.childNodes[0])
-        node.appendChild(patch.content.render())
-      } else {
-        node.textContent = patch.content;
-      }
+      node.textContent = patch.content;
       break;
     case REMOVE:
       node.parentNode.removeChild(node)

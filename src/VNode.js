@@ -38,7 +38,7 @@ class VNode {
         } else if (child instanceof Array) {
           appendChildren(child)
         } else {
-          ele.appendChild(document.createTextNode(child || ''))
+          ele.appendChild(document.createTextNode(child.toString() || ''))
         }
       })
     }
