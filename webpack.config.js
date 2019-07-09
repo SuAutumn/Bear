@@ -6,10 +6,9 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
-  mode: 'production',
   // mode: 'development',
   entry: {
-    app: './src/index.jsx',
+    app: './test/index.jsx',
   },
   output: {
     filename: '[name].bundle.js',
@@ -17,7 +16,6 @@ module.exports = {
     publicPath: './'
   },
   // devtool: 'inline-source-map',
-  devtool: false,
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')
