@@ -44,7 +44,7 @@ class VNode {
         if (child instanceof VNode) {
           ele.appendChild(child.render())
         } else {
-          ele.appendChild(document.createTextNode(child.toString() || ''))
+          ele.appendChild(document.createTextNode(child && child.toString() || ''))
         }
       })
     }
