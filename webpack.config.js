@@ -3,7 +3,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
   // mode: 'development',
@@ -61,7 +60,6 @@ module.exports = {
     runtimeChunk: {
       name: 'manifest'
     }
-    // minimizer: [new UglifyJsPlugin()]
   },
   module: {
     rules: [
