@@ -1,5 +1,7 @@
 import h from '@/VNode';
 import render from "@/render";
+import Component from "@/Component";
+import './index.scss';
 
 
 const App = function (props = {}) {
@@ -7,7 +9,9 @@ const App = function (props = {}) {
     return (
       <div>
         {props.name}
-        <div>{props.age || 25}</div>
+        <div className="font-size-20 transition-all">{props.age || 25}</div>
+        <Time></Time>
+        <button onClick={(event) => alert(event.type)}>click me!</button>
       </div>
     )
   } else {
@@ -15,11 +19,32 @@ const App = function (props = {}) {
       <div>
         no
         <div style="color: red;">data</div>
+        <Time></Time>
       </div>
     )
   }
 }
-// 修改数据
+
+class Time extends Component {
+  constructor() {
+    super()
+    this.state.time = new Date()
+  }
+  mounted() {
+    this.timer = setInterval(() => {
+      this.setState({
+        time: new Date()
+      })
+    })
+  }
+
+  render(props, state) {
+    return (
+      <div>{state.time.toLocaleString()}</div>
+    )
+  }
+}
+
 const data = {
   "name": null,
 }
