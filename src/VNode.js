@@ -12,7 +12,7 @@ function toSingleArray(array) {
   return r
 }
 
-function objForEach (obj, fn) {
+function objForEach(obj, fn) {
   if (!(obj instanceof Object)) {
     throw new TypeError(`can not iterator for ${obj}`)
   }
@@ -41,10 +41,15 @@ class VNode {
 
     function appendChildren(children) {
       children.forEach(child => {
-        if (child instanceof VNode) {
-          ele.appendChild(child.render())
+        if (!val) {
+          ele.removeAttribute(key)
+        } else if (key.slice(0, 2) === 'on') {
+          ele.addEventListener(key.slice(2).toLowerCase(), val)
         } else {
-          ele.appendChild(document.createTextNode(child && child.toString() || ''))
+          // ele.setAttribute(key, val)
+          // in chrome, the className render delay
+          // but assign value css directly render
+          key === 'className' ? (ele[key] = val) : ele.setAttribute(key, val)
         }
       })
     }
