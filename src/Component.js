@@ -20,7 +20,7 @@ export default class Component {
     let newVNode = this.render(this.props, Object.assign(this.state, obj))
     let patches = diff(newVNode, this.VNode)
     updateEle(this.VNode.el, patches)
-    newVNode.el = this.VNode.el
+    // newVNode.el = this.VNode.el
     this.VNode = newVNode
   }
   mounted () {}

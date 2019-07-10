@@ -1,5 +1,6 @@
 import Component from "./Component";
-function toSingleArray (array) {
+
+function toSingleArray(array) {
   let r = []
   array.forEach(item => {
     if (item instanceof Array) {
@@ -10,14 +11,18 @@ function toSingleArray (array) {
   })
   return r
 }
+
+function objForEach (obj, fn) {
+  if (!(obj instanceof Object)) {
+    throw new TypeError(`can not iterator for ${obj}`)
+  }
+  for (let p in obj) {
+    fn(p, obj[p], obj)
+  }
+}
+
 class VNode {
   constructor(tagName, props, ...children) {
-    if (tagName.prototype instanceof Component) {
-      return (new tagName(props)).createVNode(props)
-    }
-    if (typeof tagName === 'function') {
-      return tagName(props)
-    }
     this.tagName = tagName
     this.props = props || {}
     this.children = toSingleArray(children || [])
@@ -26,22 +31,24 @@ class VNode {
 
   render() {
     let ele = document.createElement(this.tagName)
-    for (let propName in this.props) {
-      ele[propName] = this.props[propName]
-      // ele.setAttribute(propName, this.props[propName])
-    }
+    objForEach(this.props, (key, val, props) => {
+      if (key.slice(0, 2) === 'on') {
+        ele.addEventListener(key.slice(2).toLowerCase(), val)
+      } else {
+        ele.setAttribute(key, val)
+      }
+    })
 
     function appendChildren(children) {
       children.forEach(child => {
         if (child instanceof VNode) {
           ele.appendChild(child.render())
-        } else if (child instanceof Array) {
-          appendChildren(child)
         } else {
           ele.appendChild(document.createTextNode(child.toString() || ''))
         }
       })
     }
+
     appendChildren(this.children)
     this.el = ele
     return ele
@@ -49,5 +56,11 @@ class VNode {
 }
 
 export default function h(tagName, props, ...children) {
+  if (tagName.prototype instanceof Component) {
+    return (new tagName(props)).createVNode(props)
+  }
+  if (typeof tagName === 'function') {
+    return tagName(props)
+  }
   return new VNode(tagName, props, ...children)
 }
