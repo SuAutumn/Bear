@@ -32,29 +32,26 @@ class VNode {
   render() {
     let ele = document.createElement(this.tagName)
     objForEach(this.props, (key, val, props) => {
-      if (key.slice(0, 2) === 'on') {
+      if (!val) {
+        ele.removeAttribute(key)
+      } else if (key.slice(0, 2) === 'on') {
         ele.addEventListener(key.slice(2).toLowerCase(), val)
       } else {
-        ele.setAttribute(key, val)
+        // ele.setAttribute(key, val)
+        // in chrome, the className render delay
+        // but assign value css directly render
+        key === 'className' ? (ele[key] = val) : ele.setAttribute(key, val)
       }
     })
 
-    function appendChildren(children) {
-      children.forEach(child => {
-        if (!val) {
-          ele.removeAttribute(key)
-        } else if (key.slice(0, 2) === 'on') {
-          ele.addEventListener(key.slice(2).toLowerCase(), val)
-        } else {
-          // ele.setAttribute(key, val)
-          // in chrome, the className render delay
-          // but assign value css directly render
-          key === 'className' ? (ele[key] = val) : ele.setAttribute(key, val)
-        }
-      })
-    }
+    this.children.forEach(child => {
+      if (child instanceof VNode) {
+        ele.appendChild(child.render())
+      } else {
+        ele.appendChild(document.createTextNode(child && child.toString() || ''))
+      }
+    })
 
-    appendChildren(this.children)
     this.el = ele
     return ele
   }

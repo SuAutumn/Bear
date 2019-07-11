@@ -5,24 +5,17 @@ import './index.scss';
 
 
 const App = function (props = {}) {
-  if (props.name) {
-    return (
-      <div>
-        {props.name}
-        <div className="font-size-20 transition-all">{props.age || 25}</div>
-        <Time></Time>
-        <button onClick={(event) => alert(event.type)}>click me!</button>
-      </div>
-    )
-  } else {
-    return (
-      <div>
-        no
-        <div style="color: red;">data</div>
-        <Time></Time>
-      </div>
-    )
-  }
+  const list = props.list.map(item => {
+    return <div>{item}</div>
+  })
+  const btn = props.name && (<button onClick={(event) => alert(event.type)}>click me!</button>)
+  return (
+    <div>
+      {list}
+      <Time></Time>
+      {btn}
+    </div>
+  )
 }
 
 class Time extends Component {
@@ -30,12 +23,17 @@ class Time extends Component {
     super()
     this.state.time = new Date()
   }
+
   mounted() {
     this.timer = setInterval(() => {
       this.setState({
         time: new Date()
       })
-    })
+    }, 1000)
+  }
+
+  destroyed () {
+    window.clearInterval(this.timer)
   }
 
   render(props, state) {
@@ -46,10 +44,12 @@ class Time extends Component {
 }
 
 const data = {
-  "name": null,
+  name: null,
+  list: [1, 2, 3, 4, 5]
 }
 let root = render(<App {...data} />)
 setTimeout(function () {
   data.name = 'little sheep'
+  data.list = [4, 5, 6]
   render(<App {...data} />, root)
-}, 2000)
+}, 3000)

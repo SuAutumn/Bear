@@ -24,4 +24,5 @@ export default class Component {
     this.VNode = newVNode
   }
   mounted () {}
+  destroyed () {}
 }
